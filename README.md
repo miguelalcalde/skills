@@ -5,7 +5,7 @@ This repository publishes one installable skill: `backlog`.
 Install it with:
 
 ```bash
-npx skills add miguelalcalde/agentfiles --skill backlog
+npx skills add miguelalcalde/agents --skill backlog
 ```
 
 The skill gives an LLM a simple project workflow for bootstrapping and using a
