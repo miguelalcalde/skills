@@ -1,147 +1,276 @@
 ---
 name: backlog
 description: |
-  Structured workflow for taking features from backlog to implementation.
-  Use when picking tasks, refining PRDs, planning implementation, or implementing features.
-  Invokes specialized agents: triager, refiner, planner, implementer, conductor.
+  Lightweight project backlog workflow. Use when starting a project, creating or
+  maintaining a `.backlog/` folder, capturing tasks, refining work into PRDs,
+  planning implementation, or keeping project task memory current without a
+  larger agent framework.
 ---
 
-# Backlog Workflow
+# Backlog
 
-A structured workflow for taking features from backlog to implementation using specialized agents.
+Use this skill to manage lightweight project memory in `.backlog/`.
 
-## Workflow Overview
+The goal is useful continuity, not process ceremony. Create only the artifacts
+that reduce ambiguity for the current task.
 
-```
-Backlog → Triage → PRD → Plan → Refine → PRD (refined) → Implement → Code
-```
+## Core Structure
 
-**Manual mode**: Each step is human-triggered. Agents do not auto-chain.
+When the user asks to initialize or use the backlog workflow, first check whether
+`.backlog/` exists. If it does not exist and the user is starting a project or
+explicitly asks to initialize the backlog, create:
 
-**Conductor mode**: Run the conductor workflow to orchestrate all phases automatically until complete or blocked.
-
-## Workflow Actions
-
-| Action                | Agent       | Purpose                                       | Optional command alias |
-| --------------------- | ----------- | --------------------------------------------- | ---------------------- |
-| Triage                | triager     | Select task from backlog, create blank PRD    | `/triage`              |
-| Plan `[slug]`         | planner     | Create implementation plan                    | `/plan [slug]`         |
-| Refine `[slug]`       | refiner     | Complete and validate PRD                     | `/refine [slug]`       |
-| Implement `[slug]`    | implementer | Execute plan on feature branch                | `/implement [slug]`    |
-| Conduct               | conductor   | Orchestrate all phases in a loop              | `/conduct`             |
-| Conduct phased run    | conductor   | Run specific phases only (e.g., triage,plan)  | `/conduct --phases X`  |
-| Conduct targeted run  | conductor   | Process specific feature only                 | `/conduct --slug X`    |
-
-Slash commands are optional convenience wrappers. The workflow is designed to
-work with plain prompts and subagent invocation across tools.
-
-## Agents
-
-Agents are minimal — they define role, boundaries, and tools. Methodology lives in skills.
-
-| Agent           | Branch      | Writes To                               | Methodology Skill                   |
-| --------------- | ----------- | --------------------------------------- | ----------------------------------- |
-| **triager**     | main        | `.backlog/prds/`, `.backlog/backlog.md` | `skills/backlog/triage/SKILL.md`    |
-| **refiner**     | main        | `.backlog/prds/`                        | `skills/backlog/refine/SKILL.md`    |
-| **planner**     | main        | `.backlog/plans/`, `.backlog/prds/`     | `skills/backlog/plan/SKILL.md`      |
-| **implementer** | feature/\*  | Source code                             | `skills/backlog/implement/SKILL.md` |
-| **conductor**   | main + feat | `.backlog/`, source code, action log    | Orchestrates all of the above       |
-
-## Naming Convention
-
-The workflow uses descriptive **slugs** instead of numeric IDs:
-
-| Artifact      | Format           | Example                           |
-| ------------- | ---------------- | --------------------------------- |
-| Backlog entry | `[slug] Title`   | `[user-auth] User Authentication` |
-| PRD file      | `PRD-[slug].md`  | `PRD-user-auth.md`                |
-| Plan file     | `PLAN-[slug].md` | `PLAN-user-auth.md`               |
-| Branch        | `feat/[slug]`    | `feat/user-auth`                  |
-
-Slugs: lowercase kebab-case, max 30 characters.
-
-## Status Flow
-
-### PRD Statuses
-
-```
-blank → refined → needs_review → approved
+```text
+.backlog/
+  backlog.md
+  prds/
+  plans/
+  notes.md
 ```
 
-Only a human sets `approved`. The refiner sets `refined` or `needs_review`.
+Use these roles:
 
-### Plan Statuses
+- `.backlog/backlog.md`: local task queue and status.
+- `.backlog/prds/PRD-[slug].md`: product reasoning for meaningful features or
+  ambiguous work.
+- `.backlog/plans/PLAN-[slug].md`: implementation sequencing for non-trivial
+  changes.
+- `.backlog/notes.md`: durable decisions, conventions, blockers, and context
+  that should survive across sessions.
 
-```
-draft → needs_review → approved → implemented | partially_implemented
-```
+## Bootstrap Content
 
-Only a human sets `approved`. The planner sets `draft` or `needs_review`.
+Create `.backlog/backlog.md` with:
 
-## Human Checkpoints
+```markdown
+# Backlog
 
-- After **Triage**: Review selected task, adjust if needed
-- After **Plan**: Review plan, mark as `approved` if ready
-- After **Refine**: Review PRD, mark as `approved` if ready
-- After **Implement**: Review code, create PR manually
+## In Progress
 
-## Project Setup
+## Pending
 
-Each project using this workflow needs a `.backlog/` directory:
-
-```
-your-project/
-└── .backlog/
-    ├── backlog.md
-    ├── prds/
-    └── plans/
+## Done
 ```
 
-## Example Usage
+Create `.backlog/notes.md` with:
 
-### Manual Mode (step-by-step)
+```markdown
+# Backlog Notes
 
-```bash
-# Triage the highest priority task
-"Use the triager agent to pick the highest-priority pending task and create a PRD."
+## Decisions
 
-# Create implementation plan
-"Use the planner agent to create the implementation plan for user-auth."
+## Blockers
 
-# Refine a specific PRD
-"Use the refiner agent to refine PRD-user-auth."
-
-# Execute the plan
-"Use the implementer agent to implement the approved plan for user-auth."
+## Project Conventions
 ```
 
-### Conductor Mode (automated)
+Keep `prds/` and `plans/` empty until they are needed.
 
-```bash
-# Run full pipeline until complete or blocked
-"Use the conductor agent to run the backlog pipeline until complete or blocked."
+## Task Format
 
-# Run only triage and plan phases
-"Use the conductor agent and run only phases: triage,plan."
+Use compact backlog items:
 
-# Process specific feature only
-"Use the conductor agent and process only slug: user-auth."
-
-# Named conductor for parallel operation
-"Use conductor name frontend and run phases triage,plan."
+```markdown
+- [ ] [type] [priority] **Title**. Short description.
 ```
 
-### Parallel Conductors
+Allowed types:
 
-Multiple conductors can run in parallel when handling different phases:
+- `feat`: new user-facing capability
+- `fix`: broken or incorrect behavior
+- `nitpick`: small polish or cleanup
+- `chore`: maintenance or tooling
+- `research`: investigation before deciding what to build
 
-```bash
-# Terminal 1: Create PRDs and plans
-"Use conductor name frontend and run phases triage,plan."
+Allowed priorities:
 
-# Terminal 2: Review plans
-"Use conductor name reviewer and run phase refine."
+- `high`
+- `medium`
+- `low`
 
-# Terminal 3: Implement approved plans
-"Use conductor name builder and run phase implement."
+Example:
+
+```markdown
+- [ ] [fix] [high] **Repair login redirect**. Users return to the wrong page after sign-in.
 ```
+
+## Slugs
+
+Use a slug when a task gets a PRD, plan, branch, or issue link.
+
+Rules:
+
+- lowercase kebab-case
+- max 30 characters
+- only `a-z`, `0-9`, and `-`
+- unique within `.backlog/prds/` and `.backlog/plans/`
+
+Examples:
+
+- `Repair login redirect` -> `login-redirect`
+- `Dashboard analytics` -> `dashboard-analytics`
+
+## Workflow
+
+### Capture
+
+When the user shares an idea, bug, nitpick, or task:
+
+1. Ensure `.backlog/` exists if the user wants the backlog workflow active.
+2. Add the item under `## Pending`.
+3. Choose type and priority from the user's wording and project context.
+4. Keep the item short. Put deeper context in a PRD only when needed.
+
+### Triage
+
+When choosing what to work on:
+
+1. Prefer `high`, then `medium`, then `low`.
+2. Prefer unblocked, well-scoped tasks.
+3. Move the chosen task from `## Pending` to `## In Progress`.
+4. Add or derive a slug if the task needs a PRD, plan, branch, or external issue.
+
+### Refine
+
+Create a PRD only when the task benefits from product-level clarification:
+
+- user-facing feature
+- ambiguous behavior
+- multiple acceptance criteria
+- meaningful scope or tradeoffs
+- work likely to be resumed later
+
+Skip the PRD for obvious fixes, small chores, and nitpicks.
+
+PRD path:
+
+```text
+.backlog/prds/PRD-[slug].md
+```
+
+PRD template:
+
+```markdown
+---
+slug: [slug]
+title: [title]
+status: draft
+created_at: [ISO-8601 timestamp]
+---
+
+# [Title]
+
+## Problem
+
+## Goal
+
+## Requirements
+
+## Acceptance Criteria
+
+- [ ]
+
+## Out of Scope
+
+## Open Questions
+```
+
+Use statuses:
+
+- `draft`: useful but still being shaped
+- `ready`: clear enough to plan or implement
+- `blocked`: needs a human decision or external dependency
+- `done`: implemented or no longer needed
+
+### Plan
+
+Create a plan only when implementation needs sequencing:
+
+- multiple files or subsystems
+- migration, data, auth, payments, security, or deployment risk
+- uncertain tests or verification steps
+- work that an agent should execute later
+
+Plan path:
+
+```text
+.backlog/plans/PLAN-[slug].md
+```
+
+Plan template:
+
+```markdown
+---
+slug: [slug]
+status: draft
+prd: .backlog/prds/PRD-[slug].md
+created_at: [ISO-8601 timestamp]
+---
+
+# Plan: [Title]
+
+## Summary
+
+## Tasks
+
+- [ ] [Task with file paths and verification]
+
+## Verification
+
+## Risks
+
+## Notes
+```
+
+Use statuses:
+
+- `draft`: being planned
+- `ready`: clear enough to execute
+- `in_progress`: currently being implemented
+- `blocked`: cannot continue without input
+- `done`: implemented and verified
+
+### Execute
+
+When implementing from the backlog:
+
+1. Read the relevant backlog item, PRD, and plan.
+2. Keep edits scoped to the task.
+3. Update the plan checklist if a plan exists.
+4. Move the backlog item to `## Done` when complete.
+5. Add durable decisions or blockers to `.backlog/notes.md`.
+
+Do not create PRDs or plans retroactively unless they would help future work.
+
+## GitHub Issues
+
+For now, `.backlog/` is the local source of project memory. If the project also
+uses GitHub Issues, treat issues as the external task tracker and `.backlog/` as
+the reasoning layer:
+
+- GitHub Issue: canonical task, status, discussion, assignment, automation.
+- PRD: deeper product reasoning when needed.
+- Plan: implementation sequence when needed.
+- Pull request: code review and final execution record.
+
+When linking them, include issue URLs in the PRD or plan frontmatter or notes.
+
+Suggested future labels:
+
+- `type:feat`, `type:fix`, `type:nitpick`, `type:chore`, `type:research`
+- `priority:high`, `priority:medium`, `priority:low`
+- `status:needs-refinement`, `status:ready`, `status:blocked`
+- `agent-ready`
+
+Only mark work `agent-ready` when acceptance criteria are clear, scope is
+bounded, and no unresolved human decision is required.
+
+## Rules
+
+- Prefer the smallest useful artifact.
+- Do not require PRDs for small fixes.
+- Do not require plans for obvious one-step changes.
+- Keep backlog entries readable in plain Markdown.
+- Preserve human-written notes and decisions.
+- Before editing `.backlog/`, read the relevant existing files.
+- When a task is blocked, write the blocker where future agents will see it.

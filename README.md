@@ -1,179 +1,39 @@
 # Agentfiles
 
-Portable agents, commands, skills, and file templates for Claude Code and Cursor.
+This repository publishes one installable skill: `backlog`.
 
-## Quick Start
-
-Install from a single command (no manual clone required):
+Install it with:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/miguelalcalde/agentfiles/main/setup.sh | bash
+npx skills add miguelalcalde/agentfiles --skill backlog
 ```
 
-Pass flags when piping to bash:
+The skill gives an LLM a simple project workflow for bootstrapping and using a
+local `.backlog/` folder:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/miguelalcalde/agentfiles/main/setup.sh | bash -s -- --global --verbose
+```text
+.backlog/
+  backlog.md
+  prds/
+  plans/
+  notes.md
 ```
 
-For local development of this repo:
+Use it when starting a project or when you want task work to be captured without
+turning the repository into a larger agent framework.
 
-```bash
-git clone git@github.com:miguelalcalde/agentfiles.git
-cd agentfiles
-./setup.sh --help
+Example prompts:
+
+```text
+Use the backlog skill to initialize this project.
+Use the backlog skill to capture this task.
+Use the backlog skill to refine the next ready backlog item.
+Use the backlog skill to plan the auth cleanup task.
 ```
 
-## Getting Started
+The skill intentionally keeps the workflow lightweight:
 
-1. Run the installer interactively (`curl ... | bash`).
-2. Choose what to install (`agents`, `skills`, `commands`, `files`).
-3. Choose scope (`--global`, `--local`, or custom path).
-4. Choose `symlink` or `copy` mode.
-5. Choose whether existing paths should be overwritten.
-
-Useful flags:
-
-- `--dry-run`: preview actions without writing.
-- `--verbose`: show detailed diagnostics and decision logs.
-- `--agents x,y`, `--skills x,y`, `--commands x,y`, `--files x,y`: install selected items.
-
-## Core Concepts
-
-### Agents
-
-Agents are the implementation layer: behavior, process, and tool constraints.
-
-Example: `agents/triager.md`
-
-- Reads `.backlog/backlog.md`
-- Selects the next pending task
-- Creates a PRD in `.backlog/prds/`
-
-### Commands
-
-Commands are entrypoints for workflow orchestration and focused utilities.
-
-Examples:
-
-- `commands/triage.md`: `/triage` delegates to the `triager` agent.
-- `commands/knip.md`: runs unused-code analysis and cleanup planning.
-- This was previously mapped to `picker`; it is now `triager`.
-
-Native behaviors:
-
-- Clarification requests are native assistant behavior; no `/ask` command is needed.
-- Use `/plan <slug>` for backlog workflow planning.
-- For ad-hoc file-level planning, prompt directly in chat with scope + constraints.
-
-### Skills
-
-Skills are reusable knowledge packs and templates used by agents.
-
-Examples:
-
-- `skills/backlog/`
-- `skills/commit/`
-- `skills/generate-agents-md/`
-
-### Files (file groups)
-
-`files` are top-level template directories that get installed into hidden project folders.
-
-Example:
-
-- Source file group: `backlog/`
-- Installed target: `.backlog/`
-
-So running setup with `--files backlog` materializes project scaffolding like `.backlog/config.yaml`, `.backlog/prds/`, `.backlog/plans/`.
-
-## Platform Support
-
-| Feature | Claude Code | Cursor | Notes |
-| --- | --- | --- | --- |
-| Skills | ✅ | ✅ | Same SKILL.md format |
-| Agents | ✅ | ✅ | Cursor uses subagents |
-| Commands | ✅ | ❌ | Claude slash commands only |
-| Settings | ✅ | ❌ | Claude settings are separate |
-
-## Install Layout
-
-Canonical install root:
-
-```
-~/.agents/
-├── manifest.json
-├── agents/
-├── commands/
-├── skills/
-└── backups/
-```
-
-Tool-specific links/copies:
-
-```
-~/.claude/
-├── agents/*.md
-├── commands/*.md
-└── skills/*
-
-~/.cursor/
-├── agents/*.md
-├── commands/*.md
-└── skills/*
-```
-
-## Overwrite and Backups
-
-- Interactive installs ask once: `Overwrite existing paths when present? [y/N]`.
-- If overwrite is enabled, replaced targets are backed up under:
-
-```
-~/.agents/backups/<run-id>/...
-```
-
-- Backup paths mirror the original target structure (for easier restore).
-- Backups are intentionally outside install folders to avoid autodiscovery pollution.
-
-## Bootstrap Behavior
-
-When run via `curl | bash`, the installer bootstraps from a temporary clone and cleans it up automatically after execution. It does not keep a persistent bootstrap repo in home directories.
-
-## Setup Examples
-
-```bash
-# Fully interactive
-./setup.sh
-
-# Install selected components
-./setup.sh --agents triager,planner --skills backlog --commands triage,plan --global --tools all
-
-# Install project templates locally
-./setup.sh --files backlog --local --mode copy
-
-# Debug decisions and path detection
-./setup.sh --skills backlog --global --tools claude --verbose
-```
-
-## Workflow Example
-
-Feature workflow command chain:
-
-```
-/triage -> /plan <slug> -> /refine <slug> -> /implement <slug>
-```
-
-| Command | Agent | Purpose |
-| --- | --- | --- |
-| `/triage` | `triager` | Select next backlog task and create initial PRD |
-| `/plan <slug>` | `planner` | Produce implementation plan |
-| `/refine <slug>` | `refiner` | Complete/validate PRD |
-| `/implement <slug>` | `implementer` | Execute plan changes |
-
-In Cursor, invoke the agent directly (for example `/triager`).
-
-## Development Notes
-
-- This repository is the development source.
-- End users should prefer installation through `curl -fsSL ... | bash`.
-- To contribute, modify files in this repo and push updates to `main`.
+- `backlog.md` is the local task queue.
+- PRDs are created only when the task needs product-level clarification.
+- Plans are created only when implementation needs sequencing or risk tracking.
+- Small fixes and nitpicks can stay as backlog items.
