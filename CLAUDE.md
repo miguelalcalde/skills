@@ -7,7 +7,7 @@ This repository publishes a single installable skill named `backlog`.
 Expected install command:
 
 ```bash
-npx skills add miguelalcalde/agents --skill backlog
+npx skills add miguelalcalde/skills --skill backlog
 ```
 
 Keep the repository focused on this one skill. Do not reintroduce the previous
