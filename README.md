@@ -9,14 +9,16 @@ npx skills add miguelalcalde/skills --skill backlog
 ```
 
 The skill gives an LLM a simple project workflow for bootstrapping and using a
-local `.backlog/` folder:
+local `.backlog/` folder while treating GitHub Issues as canonical for promoted
+work:
 
 ```text
 .backlog/
-  backlog.md
+  inbox.md
+  issues.md
   prds/
   plans/
-  notes.md
+  memory.md
 ```
 
 Use it when starting a project or when you want task work to be captured without
@@ -33,7 +35,12 @@ Use the backlog skill to plan the auth cleanup task.
 
 The skill intentionally keeps the workflow lightweight:
 
-- `backlog.md` is the local task queue.
+- `inbox.md` captures rough ideas that are not yet GitHub Issues.
+- `issues.md` is a generated/read-only mirror of GitHub Issues.
+- `memory.md` keeps durable decisions, conventions, blockers, and gotchas.
 - PRDs are created only when the task needs product-level clarification.
 - Plans are created only when implementation needs sequencing or risk tracking.
-- Small fixes and nitpicks can stay as backlog items.
+- Small fixes and nitpicks can stay in the inbox until they are worth promoting.
+
+See `CHANGELOG.md` for migration notes when updating projects that already have
+an older `.backlog/` layout.

@@ -2,9 +2,9 @@
 name: backlog
 description: |
   Lightweight project backlog workflow. Use when starting a project, creating or
-  maintaining a `.backlog/` folder, capturing tasks, refining work into PRDs,
-  planning implementation, or keeping project task memory current without a
-  larger agent framework.
+  maintaining a `.backlog/` folder, capturing inbox ideas, promoting work to
+  GitHub Issues, refining work into PRDs, planning implementation, or keeping
+  project task memory current without a larger agent framework.
 ---
 
 # Backlog
@@ -22,53 +22,71 @@ explicitly asks to initialize the backlog, create:
 
 ```text
 .backlog/
-  backlog.md
+  inbox.md
+  issues.md
   prds/
   plans/
-  notes.md
+  memory.md
 ```
 
 Use these roles:
 
-- `.backlog/backlog.md`: local task queue and status.
+- `.backlog/inbox.md`: raw ideas, bugs, chores, and nitpicks not yet promoted
+  to GitHub Issues.
+- `.backlog/issues.md`: generated, read-only mirror of GitHub Issues.
 - `.backlog/prds/PRD-[slug].md`: product reasoning for meaningful features or
   ambiguous work.
 - `.backlog/plans/PLAN-[slug].md`: implementation sequencing for non-trivial
   changes.
-- `.backlog/notes.md`: durable decisions, conventions, blockers, and context
-  that should survive across sessions.
+- `.backlog/memory.md`: durable decisions, conventions, blockers, gotchas, and
+  context future agents should remember.
+
+GitHub Issues are canonical for any promoted task. If an item has a GitHub
+Issue, GitHub owns its title, status, labels, discussion, and assignment.
+`.backlog/` stores local inbox items, generated issue visibility, and deeper
+reasoning.
 
 ## Bootstrap Content
 
-Create `.backlog/backlog.md` with:
+Create `.backlog/inbox.md` with:
 
 ```markdown
-# Backlog
+# Backlog Inbox
 
-## In Progress
+Raw ideas not yet promoted to GitHub Issues.
 
-## Pending
-
-## Done
+## Inbox
 ```
 
-Create `.backlog/notes.md` with:
+Create `.backlog/issues.md` with:
 
 ```markdown
-# Backlog Notes
+<!-- GENERATED FROM GITHUB ISSUES. DO NOT EDIT DIRECTLY. -->
+
+# GitHub Issues
+
+Regenerate this file from GitHub Issues when sync tooling exists.
+```
+
+Create `.backlog/memory.md` with:
+
+```markdown
+# Backlog Memory
 
 ## Decisions
 
 ## Blockers
 
 ## Project Conventions
+
+## Gotchas
 ```
 
 Keep `prds/` and `plans/` empty until they are needed.
 
-## Task Format
+## Inbox Item Format
 
-Use compact backlog items:
+Use compact inbox items:
 
 ```markdown
 - [ ] [type] [priority] **Title**. Short description.
@@ -94,6 +112,9 @@ Example:
 - [ ] [fix] [high] **Repair login redirect**. Users return to the wrong page after sign-in.
 ```
 
+When an inbox item is promoted, remove it from `.backlog/inbox.md` or replace it
+with a short link to the GitHub Issue. Do not track promoted status in the inbox.
+
 ## Slugs
 
 Use a slug when a task gets a PRD, plan, branch, or issue link.
@@ -117,9 +138,34 @@ Examples:
 When the user shares an idea, bug, nitpick, or task:
 
 1. Ensure `.backlog/` exists if the user wants the backlog workflow active.
-2. Add the item under `## Pending`.
-3. Choose type and priority from the user's wording and project context.
-4. Keep the item short. Put deeper context in a PRD only when needed.
+2. If the item is rough or not ready for GitHub, add it under `## Inbox` in
+   `.backlog/inbox.md`.
+3. If the item is ready to track, create or update a GitHub Issue when the user
+   wants GitHub-backed tracking.
+4. Choose type and priority from the user's wording and project context.
+5. Keep the item short. Put deeper context in a PRD only when needed.
+
+Do not add manually maintained task lists to `.backlog/issues.md`.
+
+### Promote
+
+When promoting inbox work to GitHub Issues:
+
+1. Create a GitHub Issue with the title, concise description, labels, and links
+   to any relevant PRD or plan.
+2. Remove the inbox item or replace it with the issue URL.
+3. Choose labels from the user's wording and project context.
+4. Regenerate `.backlog/issues.md` if the project has sync tooling.
+
+Use labels like:
+
+- `type:feat`, `type:fix`, `type:nitpick`, `type:chore`, `type:research`
+- `priority:high`, `priority:medium`, `priority:low`
+- `status:needs-refinement`, `status:ready`, `status:blocked`
+- `agent-ready`
+
+Only mark work `agent-ready` when acceptance criteria are clear, scope is
+bounded, and no unresolved human decision is required.
 
 ### Triage
 
@@ -127,8 +173,10 @@ When choosing what to work on:
 
 1. Prefer `high`, then `medium`, then `low`.
 2. Prefer unblocked, well-scoped tasks.
-3. Move the chosen task from `## Pending` to `## In Progress`.
-4. Add or derive a slug if the task needs a PRD, plan, branch, or external issue.
+3. For promoted work, read the GitHub Issue first and treat it as canonical.
+4. For unpromoted inbox work, either promote it to a GitHub Issue or keep it
+   local only if the user wants a tiny one-off task.
+5. Add or derive a slug if the task needs a PRD, plan, branch, or issue link.
 
 ### Refine
 
@@ -155,6 +203,7 @@ PRD template:
 slug: [slug]
 title: [title]
 status: draft
+issue: [GitHub issue URL or blank]
 created_at: [ISO-8601 timestamp]
 ---
 
@@ -203,6 +252,7 @@ Plan template:
 ---
 slug: [slug]
 status: draft
+issue: [GitHub issue URL or blank]
 prd: .backlog/prds/PRD-[slug].md
 created_at: [ISO-8601 timestamp]
 ---
@@ -234,43 +284,56 @@ Use statuses:
 
 When implementing from the backlog:
 
-1. Read the relevant backlog item, PRD, and plan.
+1. Read the relevant GitHub Issue or inbox item, plus any PRD and plan.
 2. Keep edits scoped to the task.
 3. Update the plan checklist if a plan exists.
-4. Move the backlog item to `## Done` when complete.
-5. Add durable decisions or blockers to `.backlog/notes.md`.
+4. Update GitHub Issue status through normal GitHub workflow when the work is
+   promoted.
+5. Add durable decisions, blockers, or gotchas to `.backlog/memory.md`.
 
 Do not create PRDs or plans retroactively unless they would help future work.
 
 ## GitHub Issues
 
-For now, `.backlog/` is the local source of project memory. If the project also
-uses GitHub Issues, treat issues as the external task tracker and `.backlog/` as
-the reasoning layer:
+Use GitHub Issues as the source of truth for promoted work:
 
 - GitHub Issue: canonical task, status, discussion, assignment, automation.
+- `.backlog/inbox.md`: local ideas not yet promoted.
+- `.backlog/issues.md`: generated snapshot for local visibility.
 - PRD: deeper product reasoning when needed.
 - Plan: implementation sequence when needed.
 - Pull request: code review and final execution record.
 
-When linking them, include issue URLs in the PRD or plan frontmatter or notes.
+When linking them, include issue URLs in the PRD or plan frontmatter. Prefer
+GitHub closing keywords such as `Closes #123` in pull requests.
 
-Suggested future labels:
+If the project has a command such as `pnpm backlog:sync` or a script such as
+`scripts/backlog-sync.ts`, use it to regenerate `.backlog/issues.md`. Do not
+manually edit generated issue content.
 
-- `type:feat`, `type:fix`, `type:nitpick`, `type:chore`, `type:research`
-- `priority:high`, `priority:medium`, `priority:low`
-- `status:needs-refinement`, `status:ready`, `status:blocked`
-- `agent-ready`
+Avoid two-way sync unless the user explicitly asks for it. It needs stable IDs,
+conflict handling, deletion behavior, label mapping, and rules for edits from
+multiple actors.
 
-Only mark work `agent-ready` when acceptance criteria are clear, scope is
-bounded, and no unresolved human decision is required.
+## Migration
+
+If an existing project has `.backlog/backlog.md`, treat it as a legacy local
+backlog:
+
+1. Ask before rewriting it unless the user explicitly requested migration.
+2. Move rough, unpromoted items to `.backlog/inbox.md`.
+3. Move or recreate promoted work as GitHub Issues.
+4. Create or refresh the generated issue mirror at `.backlog/issues.md`.
+5. Stop using `.backlog/backlog.md` once GitHub Issues are canonical.
 
 ## Rules
 
 - Prefer the smallest useful artifact.
 - Do not require PRDs for small fixes.
 - Do not require plans for obvious one-step changes.
-- Keep backlog entries readable in plain Markdown.
-- Preserve human-written notes and decisions.
+- Keep inbox entries readable in plain Markdown.
+- Treat `.backlog/issues.md` as generated and read-only.
+- Never let Markdown status override GitHub Issue status.
+- Preserve human-written memory and decisions.
 - Before editing `.backlog/`, read the relevant existing files.
 - When a task is blocked, write the blocker where future agents will see it.

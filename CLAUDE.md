@@ -20,6 +20,7 @@ Tracked project files should stay minimal:
 
 ```text
 README.md
+CHANGELOG.md
 CLAUDE.md
 skills/backlog/SKILL.md
 ```
@@ -32,10 +33,11 @@ Default structure created by the skill:
 
 ```text
 .backlog/
-  backlog.md
+  inbox.md
+  issues.md
   prds/
   plans/
-  notes.md
+  memory.md
 ```
 
 ## Design Decisions
@@ -44,12 +46,15 @@ Default structure created by the skill:
 - Prefer one self-contained `SKILL.md` over split subskills, copied templates,
   scripts, or command wrappers.
 - The skill should encode judgment, not ceremony.
+- GitHub Issues are canonical for promoted work.
+- `.backlog/inbox.md` is for rough ideas not yet promoted to GitHub Issues.
+- `.backlog/issues.md` is generated/read-only local visibility into GitHub
+  Issues.
+- `.backlog/memory.md` is curated context future agents should remember.
 - PRDs are created only when product-level clarification helps.
 - Plans are created only when implementation needs sequencing, risk tracking, or
   future agent execution.
-- Small fixes, chores, and nitpicks can stay as compact backlog items.
-- GitHub Issues are a likely future direction for automation, but V1 remains a
-  local `.backlog/` workflow.
+- Small fixes, chores, and nitpicks can stay as compact inbox items.
 
 ## Cleanup History
 
@@ -63,5 +68,7 @@ commit `2778632` to make this repo a clean source for only the `backlog` skill.
 - Preserve compatibility with the `skills/<name>/SKILL.md` layout.
 - If adding files, make sure they directly support installing or using the
   `backlog` skill.
+- Update `CHANGELOG.md` when changing the generated `.backlog/` structure,
+  migration expectations, or user-visible workflow semantics.
 - Do not add generated project `.backlog/` files to this repository; the skill
   should create those in downstream projects.
