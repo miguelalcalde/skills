@@ -98,9 +98,8 @@ Allowed types:
 
 - `feat`: new user-facing capability
 - `fix`: broken or incorrect behavior
-- `nitpick`: small polish or cleanup
-- `chore`: maintenance or tooling
-- `research`: investigation before deciding what to build
+- `nit`: small polish, copy, cleanup, tiny UX adjustment, or low-risk
+  refinement
 
 Allowed priorities:
 
@@ -177,15 +176,34 @@ promoted_at: [ISO-8601 timestamp]
 Canonical artifact lives in GitHub Issue #[number].
 ```
 
-Use labels like:
+Use this GitHub label framework:
 
-- `type:feat`, `type:fix`, `type:nitpick`, `type:chore`, `type:research`
+- `type:feat`, `type:fix`, `type:nit`
 - `priority:high`, `priority:medium`, `priority:low`
-- `status:needs-refinement`, `status:ready`, `status:blocked`
-- `agent-ready`
+- `status:unknown`, `status:ready`, `status:blocked`
 
-Only mark work `agent-ready` when acceptance criteria are clear, scope is
-bounded, and no unresolved human decision is required.
+Use exactly one `type:*` label:
+
+- `type:feat`: new behavior, capability, surface area, or supported workflow.
+- `type:fix`: broken, incorrect, confusing, or regressed behavior.
+- `type:nit`: small polish, copy, cleanup, tiny UX adjustment, or low-risk
+  refinement.
+
+Use at most one `priority:*` label:
+
+- `priority:high`: important soon, blocks other work, or meaningfully affects
+  core UX.
+- `priority:medium`: valuable, but not urgent or blocking.
+- `priority:low`: nice-to-have, opportunistic, or exploratory.
+
+Use exactly one `status:*` label for promoted open issues:
+
+- `status:unknown`: default promoted state. Needs clarification, research,
+  scoping, or acceptance criteria.
+- `status:ready`: clear enough to implement without unresolved product
+  decisions.
+- `status:blocked`: cannot proceed until a decision or dependency is resolved.
+  Link the blocking issue or decision in the issue body or a comment.
 
 ### Triage
 
