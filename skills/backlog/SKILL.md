@@ -34,17 +34,19 @@ Use these roles:
 - `.backlog/inbox.md`: raw ideas, bugs, chores, and nitpicks not yet promoted
   to GitHub Issues.
 - `.backlog/issues.md`: generated, read-only mirror of GitHub Issues.
-- `.backlog/prds/PRD-[slug].md`: product reasoning for meaningful features or
-  ambiguous work.
+- `.backlog/prds/PRD-[slug].md`: temporary drafting artifact for large or
+  ambiguous work before it is promoted to GitHub. After promotion, delete it or
+  replace it with a tiny pointer only if the user wants local traceability.
 - `.backlog/plans/PLAN-[slug].md`: implementation sequencing for non-trivial
   changes.
 - `.backlog/memory.md`: durable decisions, conventions, blockers, gotchas, and
   context future agents should remember.
 
 GitHub Issues are canonical for any promoted task. If an item has a GitHub
-Issue, GitHub owns its title, status, labels, discussion, and assignment.
-`.backlog/` stores local inbox items, generated issue visibility, and deeper
-reasoning.
+Issue, GitHub owns its title, body, status, labels, discussion, and assignment.
+Do not keep a second editable copy of the same promoted artifact in `.backlog/`.
+Local PRDs are drafting buffers before promotion; local plans are execution
+notes when implementation needs sequencing.
 
 ## Bootstrap Content
 
@@ -149,13 +151,31 @@ Do not add manually maintained task lists to `.backlog/issues.md`.
 
 ### Promote
 
-When promoting inbox work to GitHub Issues:
+When promoting local work to GitHub Issues:
 
-1. Create a GitHub Issue with the title, concise description, labels, and links
-   to any relevant PRD or plan.
-2. Remove the inbox item or replace it with the issue URL.
-3. Choose labels from the user's wording and project context.
-4. Regenerate `.backlog/issues.md` if the project has sync tooling.
+1. If the work has a PRD, create or update the GitHub Issue from the PRD
+   content.
+2. Verify the GitHub Issue contains the canonical title, body, labels, and
+   acceptance criteria.
+3. Remove the inbox item or replace it with the issue URL.
+4. Delete the promoted PRD unless the user explicitly wants a tiny pointer file.
+5. If keeping a pointer file, include only frontmatter and a short note that the
+   GitHub Issue is canonical.
+6. Choose labels from the user's wording and project context.
+7. Regenerate `.backlog/issues.md` if the project has sync tooling.
+
+Pointer file example:
+
+```markdown
+---
+slug: [slug]
+status: promoted
+issue: [GitHub issue URL]
+promoted_at: [ISO-8601 timestamp]
+---
+
+Canonical artifact lives in GitHub Issue #[number].
+```
 
 Use labels like:
 
@@ -253,7 +273,7 @@ Plan template:
 slug: [slug]
 status: draft
 issue: [GitHub issue URL or blank]
-prd: .backlog/prds/PRD-[slug].md
+prd: [PRD path or blank]
 created_at: [ISO-8601 timestamp]
 ---
 
@@ -297,11 +317,13 @@ Do not create PRDs or plans retroactively unless they would help future work.
 
 Use GitHub Issues as the source of truth for promoted work:
 
-- GitHub Issue: canonical task, status, discussion, assignment, automation.
+- GitHub Issue: canonical title, body, status, labels, discussion, assignment,
+  and automation.
 - `.backlog/inbox.md`: local ideas not yet promoted.
-- `.backlog/issues.md`: generated snapshot for local visibility.
-- PRD: deeper product reasoning when needed.
-- Plan: implementation sequence when needed.
+- `.backlog/issues.md`: generated metadata snapshot for local visibility.
+- PRD: temporary local drafting buffer before promotion; not a parallel copy
+  after promotion.
+- Plan: local implementation sequence when needed; may reference a GitHub Issue.
 - Pull request: code review and final execution record.
 
 When linking them, include issue URLs in the PRD or plan frontmatter. Prefer
@@ -353,6 +375,8 @@ backlog:
 - Keep inbox entries readable in plain Markdown.
 - Treat `.backlog/issues.md` as generated and read-only.
 - Never let Markdown status override GitHub Issue status.
+- Do not maintain duplicate editable copies of promoted issue content locally
+  and in GitHub.
 - Preserve human-written memory and decisions.
 - Before editing `.backlog/`, read the relevant existing files.
 - When a task is blocked, write the blocker where future agents will see it.

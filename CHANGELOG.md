@@ -29,6 +29,10 @@ npx skills add mikemajara/skills --skill backlog
 - `.backlog/memory.md` replaces `.backlog/notes.md` for curated decisions,
   conventions, blockers, gotchas, and durable agent context.
 - PRD and plan templates now include an optional `issue` frontmatter field.
+- Local PRDs are drafting buffers before GitHub promotion; after promotion,
+  delete them or keep a tiny pointer file. GitHub Issues own the canonical
+  title, body, status, labels, and discussion—do not maintain duplicate
+  editable copies in `.backlog/`.
 
 ### Added
 
