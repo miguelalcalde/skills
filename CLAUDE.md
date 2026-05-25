@@ -7,7 +7,7 @@ This repository publishes a single installable skill named `backlog`.
 Expected install command:
 
 ```bash
-npx skills add miguelalcalde/skills --skill backlog
+npx skills add mikemajara/skills --skill backlog
 ```
 
 Keep the repository focused on this one skill. Do not reintroduce the previous
@@ -23,6 +23,7 @@ README.md
 CHANGELOG.md
 CLAUDE.md
 skills/backlog/SKILL.md
+skills/backlog/scripts/backlog-sync.mjs
 ```
 
 The `backlog` skill is intentionally self-contained. It teaches an LLM how to
@@ -43,8 +44,8 @@ Default structure created by the skill:
 ## Design Decisions
 
 - Skill name must remain `backlog`.
-- Prefer one self-contained `SKILL.md` over split subskills, copied templates,
-  scripts, or command wrappers.
+- Prefer one self-contained `SKILL.md`; keep helper scripts optional, small,
+  dependency-free, and directly tied to the `backlog` workflow.
 - The skill should encode judgment, not ceremony.
 - GitHub Issues are canonical for promoted work.
 - `.backlog/inbox.md` is for rough ideas not yet promoted to GitHub Issues.

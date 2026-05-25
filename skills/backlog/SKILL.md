@@ -307,9 +307,28 @@ Use GitHub Issues as the source of truth for promoted work:
 When linking them, include issue URLs in the PRD or plan frontmatter. Prefer
 GitHub closing keywords such as `Closes #123` in pull requests.
 
-If the project has a command such as `pnpm backlog:sync` or a script such as
-`scripts/backlog-sync.ts`, use it to regenerate `.backlog/issues.md`. Do not
-manually edit generated issue content.
+When a project wants GitHub sync, use this skill's
+`scripts/backlog-sync.mjs` helper. It requires Node.js and the GitHub CLI, but
+no npm dependencies. Run it from the downstream project root, either directly
+from the installed skill path or copied into the project as
+`scripts/backlog-sync.mjs`.
+
+Default usage:
+
+```bash
+node scripts/backlog-sync.mjs
+```
+
+The helper discovers the GitHub repository from
+`git config --get remote.origin.url`, writes `.backlog/issues.md`, and defaults
+to all issues with a limit of 1000. Override defaults with flags:
+
+```bash
+node scripts/backlog-sync.mjs --repo owner/repo --output .backlog/issues.md --state all --limit 1000
+```
+
+The helper rewrites `.backlog/issues.md`; do not manually edit generated issue
+content.
 
 Avoid two-way sync unless the user explicitly asks for it. It needs stable IDs,
 conflict handling, deletion behavior, label mapping, and rules for edits from

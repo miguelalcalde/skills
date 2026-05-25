@@ -4,6 +4,12 @@
 
 ### Changed
 
+- Updated the install target after the repository transfer:
+
+```bash
+npx skills add mikemajara/skills --skill backlog
+```
+
 - GitHub Issues are now canonical for promoted work. `.backlog/` remains the
   local project memory layer, not a competing task tracker.
 - The default backlog structure is now:
@@ -23,6 +29,12 @@
 - `.backlog/memory.md` replaces `.backlog/notes.md` for curated decisions,
   conventions, blockers, gotchas, and durable agent context.
 - PRD and plan templates now include an optional `issue` frontmatter field.
+
+### Added
+
+- Added `skills/backlog/scripts/backlog-sync.mjs`, an optional dependency-free
+  helper that downstream projects can run or copy to regenerate
+  `.backlog/issues.md` from GitHub Issues with the GitHub CLI.
 
 ### Migration Notes
 
@@ -50,7 +62,13 @@ For projects already using an older `.backlog/` layout:
 <!-- GENERATED FROM GITHUB ISSUES. DO NOT EDIT DIRECTLY. -->
 ```
 
-5. Stop manually maintaining `.backlog/backlog.md` once GitHub Issues are
+5. To enable local GitHub sync, run `skills/backlog/scripts/backlog-sync.mjs`
+   from the installed skill or copy it into the downstream project as
+   `scripts/backlog-sync.mjs`. The helper discovers the repo from
+   `git config --get remote.origin.url`; pass `--repo owner/repo` only when
+   overriding that default. If the project has `package.json`, add a script such
+   as `"backlog:sync": "node scripts/backlog-sync.mjs"`.
+6. Stop manually maintaining `.backlog/backlog.md` once GitHub Issues are
    canonical. Remove or archive it only after confirming its content has moved
    to the inbox, GitHub Issues, PRDs, plans, or memory.
 
@@ -61,12 +79,7 @@ status.
 
 ### Changed
 
-- Updated the install instructions to use:
-
-```bash
-npx skills add miguelalcalde/skills --skill backlog
-```
-
+- Updated the install instructions during repository cleanup.
 - Documented that this repository publishes a single installable skill named
   `backlog`.
 - Kept the repository focused on the `backlog` skill and its minimal
