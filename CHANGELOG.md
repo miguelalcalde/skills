@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Simplified promoted-issue types and GitHub labels: `nitpick`/`chore`/`research`
+  are now `type:nit`; status labels are `status:unknown`, `status:ready`, and
+  `status:blocked` (replacing `needs-refinement` and `agent-ready`).
 - Updated the install target after the repository transfer:
 
 ```bash
